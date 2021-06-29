@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>Coding Train: Data and APIs Project 1</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.9.1/underscore-min.js"></script>
+
+ <link rel="stylesheet" href="./css/main.css">
+<style>
+
+.node {
+		cursor: pointer;
+	}
+
+	.node circle {
+	  fill: #fff;
+	  stroke: steelblue;
+	  stroke-width: 3px;
+	}
+
+	.node text {
+	  font: 12px sans-serif;
+	}
+
+	.link {
+	  fill: none;
+	  stroke: #ccc;
+	  stroke-width: 2px;
+	}
+
+
+</style>
+ <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+ <script src="https://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.9.1/underscore-min.js"></script>
+
+  </head>
+
+  <body>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.17/d3.min.js"></script>
+
+    <div id="chart_0"></div>
+    <div id="chart_1"></div>
+    <script src="https://cdn.zoomcharts-cloud.com/1/latest/zoomcharts.js"></script>
+<content>
+<div id="demo"></div>
+
+</content>
+    <script>
+
+   getData();
+
+   var arrayofallusers=[];
+   var columns;
+   var userid=[];
+   var useridinterctwith=[];
+   var user_profile = {};
+   var listArray=[];
+   var numbeofArr={};
+   async function getData(){
+     
+
+     const response = await fetch('usersdata.csv');
+     const data = await response.text();
+     console.log(data);
+     const table = data.split('\n').slice(1);
+     table.forEach(row=>{
+        columns = row.split(',');
+        userid.push(columns[0]) ;
+        useridinterctwith.push(columns[1]) ;
+      // console.log(userid,useridinterctwith);
+     })
+
+     console.log(userid,useridinterctwith);
+    // console.log(userid.length);
+     var p1=[1,3,444,10];
+     var friends=[];
+     var friendsoffriends=[];
+    // console.log(p1);
+
+
+    //   for(var num in p1){
+    //     var str ="arr_"+ num;
+
+    //     numbeofArr[str] = [];
+    //   }
+    //   var str ="arr_"+ 0+" = undefined";
+    //   console.log(str);
+    //   numbeofArr.str = 12;
+    //   console.log(numbeofArr.str);
+      
+    
+for(var zee in p1){
+ 
+  var str ="arr_"+ 0+" = undefined";
+  numbeofArr["str"] = [];
+ // console.log(numbeofArr.str);
+  numbeofArr.str.push({'name': 'Patient ' + Number(p1[zee]),'parent': null},);
+//   console.log(numbeofArr.str);
+  listArray.push({'name':Number(p1[zee]),'parent': null},);
+
+       for(var nuberifuser in userid){
+         if(Number(p1[zee]) == Number(userid[nuberifuser])){
+           console.log('found friends of patient ',p1[zee],Number(useridinterctwith[nuberifuser]));
+          listArray.push({'name':Number(useridinterctwith[nuberifuser]) ,'parent':'Patient ' +  Number(p1[zee])},);
+          numbeofArr.str.push({'name':Number(useridinterctwith[nuberifuser]) ,'parent':'Patient ' +  Number(p1[zee])},);
+           
+          friends.push(useridinterctwith[nuberifuser]);
+          }
+        }
+
+        console.log('done');
+
+        p2=[];
+for(var layer=0;layer<6;layer++) {
+        for(var f in friends){
+          p2.push(friends[f].replace(/\n/g, ''));
+        }
+        friends =[];
+        for(var ll in p2){
+          for(var nuberifuser in userid){
+            if(Number(p2[ll]) == Number(userid[nuberifuser])){
+              console.log('found friend of patient ',p2[ll],Number(useridinterctwith[nuberifuser]));
+              listArray.push({'name':Number(useridinterctwith[nuberifuser]) ,'parent': Number(p2[ll])},);
+              numbeofArr.str.push({'name':Number(useridinterctwith[nuberifuser]) ,'parent': Number(p2[ll])},);
+
+              friends.push(useridinterctwith[nuberifuser]);
+            }
+          }
+          console.log('done');
+        }
+
+
+        p2 = []; 
+        }
+        ploting(numbeofArr.str,zee);
+    }
+    
+  }
+ 
+function ploting(arr){
+    console.log(arr.length);
+    const nest = (items, name = null, link = 'parent') =>
+  items
+    .filter(item => item[link] === name)
+    .map(item => ({ ...item, children: nest(items, item.name) }));
+
+    
+// ************** Generate the tree diagram	 *****************
+var margin = {top: 20, right: 120, bottom: 20, left: 120},
+	width = 200*arr.length - margin.right - margin.left,
+	height = 40*arr.length - margin.top - margin.bottom;
+	
+    var i = 0,
+	duration = 750,
+	root;
+
+var tree = d3.layout.tree()
+	.size([height, width]);
+
+var diagonal = d3.svg.diagonal()
+	.projection(function(d) { return [d.y, d.x]; });
+
+var svg = d3.select("#chart_0").append("svg")
+	.attr("width", width + margin.right + margin.left)
+	.attr("height", height + margin.top + margin.bottom)
+  .append("g")
+	.attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+root = nest(arr)[0];
+root.x0 = height / 2;
+root.y0 = 0;
+update(root);
+d3.select(self.frameElement).style("height", "500px");
+
+
+function update(source) {
+
+  // Compute the new tree layout.
+  var nodes = tree.nodes(root).reverse(),
+	  links = tree.links(nodes);
+
+  // Normalize for fixed-depth.
+  nodes.forEach(function(d) { d.y = d.depth * 180; });
+
+  // Update the nodes…
+  var node = svg.selectAll("g.node")
+	  .data(nodes, function(d) { return d.id || (d.id = ++i); });
+
+  // Enter any new nodes at the parent's previous position.
+  var nodeEnter = node.enter().append("g")
+	  .attr("class", "node")
+	  .attr("transform", function(d) { return "translate(" + source.y0 + "," + source.x0 + ")"; })
+	  .on("click", click);
+
+  nodeEnter.append("circle")
+	  .attr("r", 1e-6)
+	  .style("fill", function(d) { return d._children ? "lightsteelblue" : "#fff"; });
+
+  nodeEnter.append("text")
+	  .attr("x", function(d) { return d.children || d._children ? -13 : 13; })
+	  .attr("dy", ".35em")
+	  .attr("text-anchor", function(d) { return d.children || d._children ? "end" : "start"; })
+	  .text(function(d) { return d.name; })
+	  .style("fill-opacity", 1e-6);
+
+  // Transition nodes to their new position.
+  var nodeUpdate = node.transition()
+	  .duration(duration)
+	  .attr("transform", function(d) { return "translate(" + d.y + "," + d.x + ")"; });
+
+  nodeUpdate.select("circle")
+	  .attr("r", 10)
+	  .style("fill", function(d) { return d._children ? "lightsteelblue" : "#fff"; });
+
+  nodeUpdate.select("text")
+	  .style("fill-opacity", 1);
+
+  // Transition exiting nodes to the parent's new position.
+  var nodeExit = node.exit().transition()
+	  .duration(duration)
+	  .attr("transform", function(d) { return "translate(" + source.y + "," + source.x + ")"; })
+	  .remove();
+
+  nodeExit.select("circle")
+	  .attr("r", 1e-6);
+
+  nodeExit.select("text")
+	  .style("fill-opacity", 1e-6);
+
+  // Update the links…
+  var link = svg.selectAll("path.link")
+	  .data(links, function(d) { return d.target.id; });
+
+  // Enter any new links at the parent's previous position.
+  link.enter().insert("path", "g")
+	  .attr("class", "link")
+	  .attr("d", function(d) {
+		var o = {x: source.x0, y: source.y0};
+		return diagonal({source: o, target: o});
+	  });
+
+  // Transition links to their new position.
+  link.transition()
+	  .duration(duration)
+	  .attr("d", diagonal);
+
+  // Transition exiting nodes to the parent's new position.
+  link.exit().transition()
+	  .duration(duration)
+	  .attr("d", function(d) {
+		var o = {x: source.x, y: source.y};
+		return diagonal({source: o, target: o});
+	  })
+	  .remove();
+
+  // Stash the old positions for transition.
+  nodes.forEach(function(d) {
+	d.x0 = d.x;
+	d.y0 = d.y;
+  });
+}
+
+// Toggle children on click.
+function click(d) {
+  if (d.children) {
+	d._children = d.children;
+	d.children = null;
+  } else {
+	d.children = d._children;
+	d._children = null;
+  }
+  update(d);
+}  
+
+}
+
+
+var chart = new NetChart({
+        container: document.getElementById("demo"),
+        area: { height: null },
+        data: { url: "data/people.json" },
+        navigation: { initialNodes: ["m-1"], mode: "focusnodes" },
+        style: {
+            node: {
+                display: "image",
+                imageCropping: true
+            },
+            nodeStyleFunction: function (node) {
+                node.image = "https://zoomcharts.com/dvsl/data/net-chart/friend-net/" + node.id + ".png";
+            }
+        }
+    });
+
+    var div = $('<div class="type-select" style="position:absolute;z-index:2" >');
+    var x = $('<label for="v1"><input id="v1" type="radio" checked="checked" name="nodeType" value="image" /> "image" (default)</label><br/>');
+    div.append(x);
+    x = $('<label for="v2"><input id="v2" type="radio" name="nodeType" value="rectangle"/> "rectangle"</label><br/>');
+    div.append(x);
+    x = $('<label for="v3"><input id="v3" type="radio" name="nodeType" value="text"/> "text"</label><br/>');
+    div.append(x);
+    x = $('<label for="v4"><input id="v4" type="radio" name="nodeType" value="roundtext" /> "roundtext"</label><br />');
+    div.append(x);
+    x = ('<label for="v5"><input id="v5" type="radio" name="nodeType" value="droplet" /> "droplet"</label><br />');
+    div.append(x);
+    $("#demo").before(div);
+
+    // using jquery to add event handler
+    // Update the chart settings, when user changes desired node display type
+    $('.type-select input:radio').change(function () {
+        var selected = $('.type-select input:radio:checked').val();
+        chart.updateSettings({
+            style: {
+                node: {
+                    display: selected
+                }
+            }
+        });
+    });
+
+
+
+
+
+</script>
+  </body>
+</html>
+
+
+
+
+
